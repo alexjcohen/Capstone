@@ -139,7 +139,7 @@ tqdm==4.46.0
 Twisted==17.9.0
 ufw==0.36
 unattended-upgrades==0.1
-urllib3==1.22
+urllib3==1.24.2
 wasabi==0.6.0
 Werkzeug==1.0.1
 wrapt==1.12.1
