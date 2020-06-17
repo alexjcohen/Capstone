@@ -15,7 +15,8 @@ Once the instance is started, please clone the following repo using the below co
 
 > `git clone https://github.com/amir-jafari/Cloud-Computing.git`
 
-And follow the installation instructions found [here for Ubuntu 18.04](https://github.com/amir-jafari/Cloud-Computing/tree/master/Deep-Learning-Kit-Installation/Shell-Script-Installation/Ubuntu-18.040) and [here for Ubuntu 16.04](https://github.com/amir-jafari/Cloud-Computing/tree/master/Deep-Learning-Kit-Installation/Shell-Script-Installation/Ubuntu-16.04) - credit to Dr. Amir Jafari for the code
+And follow the installation instructions found [here](https://github.com/amir-jafari/Cloud-Computing/tree/master/Deep-Learning-Kit-Installation/Shell-Script-Installation), where you can find instructions for your specific version of Ubuntu (I used 18.04) 
+- _credit to Dr. Amir Jafari for the above code_
 
 Once installed, run the following code:
 
