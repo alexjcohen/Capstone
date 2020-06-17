@@ -1,10 +1,10 @@
-#Code
+# Code
 
 Code repository for the project _Understanding The Effects Of Distortion On Object Detection Models (Working Title)_ 
 
 ### Set Up and Installation
 
-This code can be run on any instance with a GPU but was developed on the following instance sizes
+This code can be run on any instance with a GPU but was developed on the following instance sizes:
 	
 - AWS: _g3.4xlarge_
 
@@ -21,11 +21,11 @@ Once installed, run the following code:
 
 ```
 
-git clone https://github.com/alexjcohen/Capstone.git 
+git clone https://github.com/alexjcohen/Capstone.git; 
 
-cd Code
+cd Code;
 
-pip3 install -r requirements.txt
+pip3 install -r requirements.txt; # <-- under development
 
 ```
 
@@ -33,7 +33,7 @@ and you should be good to go!
 
 
 
-###File Overview
+### File Overview
 - `analyze_image.py` - code to get the actual bounding boxes for the COCO validation images (currently set to the 100th image by ID
 
 - `data_loaders.py` - file with the validation data loader, AddNoise, and AddBlur classes for use in `gen_predictions.py`
