@@ -25,7 +25,7 @@ def convert_xy_to_wh(output_dict):
     :return: output_dict with updated coordinates
     """
     output_dict['bbox'][2] = output_dict['bbox'][2] - output_dict['bbox'][0]
-    output_dict['bbox'][2] = output_dict['bbox'][2] - output_dict['bbox'][0]
+    output_dict['bbox'][3] = output_dict['bbox'][3] - output_dict['bbox'][1]
     return output_dict
 
 
@@ -68,7 +68,8 @@ def convert_to_wh(resFile):
 
 def loadRes(resFile, cocoObj):
     """
-    Load result file and return a result api object.
+    Load result file and return a result api object. Adapted from existing pycocotools COCO class, but updated for
+    python3 instead of python2
     :param   resFile (str)     : file name of result file
     :param   cocoObj (obj)     : coco ground truth object
     :return: res (obj)         : result api object
@@ -138,3 +139,33 @@ def loadRes(resFile, cocoObj):
     res.createIndex()
     return res
 
+
+def get_sample_image(loader, filename, iters=4):
+    """
+    Function to get sample image to show transformations
+    :param loader: data loader object (with transformations applied)
+    :param filename: output filename
+    :param iters: number of iterations to get to destination image (default is 4 for bicycle)
+    :return: saves image file to specified directory
+    """
+    # get maptplotlib
+    import matplotlib.pyplot as plt
+
+    # define iterator
+    it = iter(loader)
+
+    # loop through iterator n times to reach target image
+    for i in range(iters):
+        next(it)
+
+    # extract image tensor
+    img = next(it)['img']
+
+    # show image after permutation
+    plt.imshow(img.detach().cpu().squeeze().permute(1, 2, 0))
+    plt.axis("off")
+
+    # save image and display in console
+    plt.savefig(filename)
+    plt.show()
+    print('Image saved')
