@@ -33,6 +33,19 @@ pip3 install -r requirements.txt; # <-- under development
 and you should be good to go!
 
 
+### Data
+The data used for this project comes from the Common Objects in Context dataset, and more information can be found [here](http://cocodataset.org/#home). The data used comes from the 2017 set of images, and can be downloaded using the following commands after completing the installation instructions above and cloning/navigating from this repository:
+
+```
+sudo apt-get install zip;
+mkdir Data; cd Data;
+wget http://images.cocodataset.org/annotations/annotations_trainval2017.zip; unzip annotations_trainval2017.zip;
+wget http://images.cocodataset.org/zips/train2017.zip; unzip train2017.zip
+wget http://images.cocodataset.org/zips/val2017.zip; unzip val2017.zip;
+rm annotations_trainval2017.zip; rm train2017.zip; val2017.zip;
+cd ..;
+```
+
 
 ### File Overview
 - `analyze_image.py` - code to get the actual bounding boxes for the COCO validation images (currently set to the 100th image by ID
