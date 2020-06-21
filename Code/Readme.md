@@ -11,7 +11,7 @@ This code can be run on any instance with a GPU but was developed on the followi
 - GCP: _n1-standard-8 (8 vCPUs, 250 GB Memory) with 1 x NVIDIA Tesla K80_
 
 
-Once the instance is started, please clone the following repo using the below command:
+Once the instance is started, please clone the following repo using the below command to set up the CUDA GPU and install the main machine learning packages used during this project:
 
 > `git clone https://github.com/amir-jafari/Cloud-Computing.git`
 
