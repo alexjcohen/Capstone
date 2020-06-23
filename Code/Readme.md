@@ -60,6 +60,6 @@ cd ..;
 
 - `predict_objdet.py` - code to generate and display predicted bounding boxes and classes for a single image for interactive visualization
 
-- `train_fasterRCNN_distory.py` - code to train the pytorch Faster R-CNN implementation on distorted data to (hopefully) mitigate distortion effects (under development)
+- `train_fasterRCNN_distort.py` - code to train the pytorch Faster R-CNN implementation on distorted data to (hopefully) mitigate distortion effects (under development)
 
 - `utils.py` - utility code with class labels, coordinate conversion, json conversion, json results parsing, and sample image display functionality 
