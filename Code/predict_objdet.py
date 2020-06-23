@@ -12,9 +12,17 @@ from utils import COCOLabels
 COCO_INSTANCE_CATEGORY_NAMES = COCOLabels().labels
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
+confidence = 0.9
+
 # run on example image - hardcoded for now
 # load image and convert to tensor
-im = cv2.cvtColor(cv2.imread('Data/val2017/000000376900.jpg'), cv2.COLOR_RGB2BGR)
+im = cv2.cvtColor(cv2.imread('Data/val2017/000000174482.jpg'), cv2.COLOR_RGB2BGR)
+
+# add any additional transformations here:
+
+# PLACEHOLDER
+
+# turn to image tensor and move to device
 img_t = transforms.functional.to_tensor(Image.fromarray(im)).to(device)
 
 # load model
@@ -34,7 +42,7 @@ text_th = 1
 # draw boxes and labels. plot
 for i in range(len(pred_class)):
     # for now - only show objects with a score above 0.9 to reduce noise in output
-    if pred_scores[i] > 0.9:
+    if pred_scores[i] > confidence:
         cv2.rectangle(im, pred_boxes[i][0], pred_boxes[i][1], (0, 255, 0), 1)
         cv2.putText(im, pred_class[i], pred_boxes[i][0], cv2.FONT_HERSHEY_SIMPLEX, text_size, (0, 255, 0), thickness=1)
 
