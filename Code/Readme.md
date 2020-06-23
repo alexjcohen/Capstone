@@ -48,14 +48,18 @@ cd ..;
 
 
 ### File Overview
-- `analyze_image.py` - code to get the actual bounding boxes for the COCO validation images (currently set to the 100th image by ID
+- `analyze_image.py` - code to get the actual bounding boxes for the COCO validation images (currently set to the 100th image by ID)
 
-- `data_loaders.py` - file with the validation data loader, AddNoise, and AddBlur classes for use in `gen_predictions.py`
+- `data_loaders.py` - file with the validation and training data loaders (with/without resizing and batch loading), AddNoise, and AddBlur classes for use in `gen_predictions.py` and `train_fasterRCNN_distort.py`
 
 - `evaluate_coco.py` - code to evaluate predicted output on 2017 COCO validation images. Can be run from the command line using `python3 evaluate_coco.py --results-file /path/to/results`. See `python3 evaluate_coco.py --help` for more information
 
 - `gen_predictions.py` - code to generate all 5000 predictions for the COCO validation images and dump results into a json file for use in the `evaluate_coco.py` script. Must currently be run interactively
 
+- `image_resize.py` - code to find the minimum/maximum widths and heights in the underlying dataset to understand requirements for resizing images during model training. See `python3 image_resize.py --help` for more information
+
 - `predict_objdet.py` - code to generate and display predicted bounding boxes and classes for a single image for interactive visualization
+
+- `train_fasterRCNN_distory.py` - code to train the pytorch Faster R-CNN implementation on distorted data to (hopefully) mitigate distortion effects (under development)
 
 - `utils.py` - utility code with class labels, coordinate conversion, json conversion, json results parsing, and sample image display functionality 
