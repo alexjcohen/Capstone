@@ -7,6 +7,7 @@ import torchvision.transforms as transforms
 import matplotlib.pyplot as plt
 from PIL import Image
 from utils import COCOLabels
+from data_loaders import AddNoise, AddBlur
 
 # define category names and device
 COCO_INSTANCE_CATEGORY_NAMES = COCOLabels().labels
@@ -18,13 +19,13 @@ confidence = 0.9
 # load image and convert to tensor
 im = cv2.cvtColor(cv2.imread('Data/val2017/000000174482.jpg'), cv2.COLOR_RGB2BGR)
 
-# add any additional transformations here:
+# add any additional transformations here and turn to image tensor and move to device
+add_effects = transforms.Compose([
+    AddNoise(0, 0, 0)
+])
 
-# PLACEHOLDER
-
-# turn to image tensor and move to device
-img_t = transforms.functional.to_tensor(Image.fromarray(im)).to(device)
-
+img_pil = add_effects(Image.fromarray(im))
+img_t = transforms.functional.to_tensor(img_pil).to(device)
 # load model
 model = torchvision.models.detection.fasterrcnn_resnet50_fpn(pretrained=True).to(device)
 model.eval()
@@ -37,20 +38,15 @@ pred_scores = [float(i) for i in pred['scores'].detach().cpu().numpy()]
 
 # set text size
 text_size = 1
-text_th = 1
+text_th = 2
 
 # draw boxes and labels. plot
 for i in range(len(pred_class)):
     # for now - only show objects with a score above 0.9 to reduce noise in output
     if pred_scores[i] > confidence:
-        cv2.rectangle(im, pred_boxes[i][0], pred_boxes[i][1], (0, 255, 0), 1)
-        cv2.putText(im, pred_class[i], pred_boxes[i][0], cv2.FONT_HERSHEY_SIMPLEX, text_size, (0, 255, 0), thickness=1)
+        cv2.rectangle(img_pil, pred_boxes[i][0], pred_boxes[i][1], (0, 255, 0), 1)
+        cv2.putText(img_pil, pred_class[i], pred_boxes[i][0], cv2.FONT_HERSHEY_SIMPLEX, text_size, (0, 255, 0), thickness=text_th)
 
-plt.imshow(im)
+plt.imshow(img_pil)
 plt.axis('off')
 plt.show()
-
-
-
-
-

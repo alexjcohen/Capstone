@@ -26,8 +26,8 @@ class AddNoise(object):
         noise2 = np.random.normal(self.mean, self.std, (sample.size[1], sample.size[0]))
         sample_out = np.copy(sample)
         sample_out[:, :, 0] = sample_out[:, :, 0] + noise0 - 2*((noise0 + sample_out[:, :, 0] < 0) | (noise0 + sample_out[: , :, 0] > 255))
-        sample_out[:, :, 1] = sample_out[:, :, 1] + noise1 - 2*((noise1 + sample_out[:, :, 0] < 0) | (noise1 + sample_out[: , :, 0] > 255))
-        sample_out[:, :, 2] = sample_out[:, :, 2] + noise2 - 2*((noise2 + sample_out[:, :, 0] < 0) | (noise2 + sample_out[: , :, 0] > 255))
+        sample_out[:, :, 1] = sample_out[:, :, 1] + noise1 - 2*((noise1 + sample_out[:, :, 1] < 0) | (noise1 + sample_out[: , :, 1] > 255))
+        sample_out[:, :, 2] = sample_out[:, :, 2] + noise2 - 2*((noise2 + sample_out[:, :, 2] < 0) | (noise2 + sample_out[: , :, 2] > 255))
 
         return sample_out
 
@@ -45,6 +45,12 @@ class AddBlur(object):
 
         sample_out = sample.filter(ImageFilter.GaussianBlur(radius=self.radius))
 
+        return sample_out
+
+
+class Rescale(object):
+    def __call__(self, sample):
+        sample_out = (sample-sample.min())/(sample.max() - sample.min())
         return sample_out
 
 
@@ -120,7 +126,7 @@ class TrainImageLoader(Dataset):
         labels = [a['category_id'] for a in self.coco.loadAnns(self.coco.getAnnIds(imgIds=pic, iscrowd=None))]
         labels = torch.LongTensor(np.array(labels)).to(self.device)
 
-        target = {}
+        target = dict()
         target['boxes'] = boxes
         target['labels'] = labels
 
@@ -162,25 +168,14 @@ class TrainImageLoaderResize(Dataset):
         img_name = os.path.join(self.filepath, self.coco.loadImgs(pic)[0].get('file_name'))
 
         # load image, convert to RGB, and resize
-        img = Image.open(img_name).convert('RGB')
-        orig_width = img.width
-        orig_height = img.height
-        img = img.resize(self.size)
+        img_unscale = Image.open(img_name).convert('RGB')
+        img = Image.open(img_name).convert('RGB').resize(self.size)
 
-        # determine scale ratios
-        width_ratio = img.width/orig_width
-        height_ratio = img.height/orig_height
+        width_ratio = img.width / img_unscale.width
+        height_ratio = img.height / img_unscale.height
 
         # get bounding boxes for image
         boxes = [a['bbox'] for a in self.coco.loadAnns(self.coco.getAnnIds(imgIds=pic, iscrowd=None))]
-
-        # convert (w, h) to (x2, y2) and then adjust bounding boxes by resizing ratio
-        for box in boxes:
-            box[2] = (box[2] + box[0])*width_ratio
-            box[3] = (box[3] + box[1])*height_ratio
-            box[0] *= width_ratio
-            box[1] *= height_ratio
-
         boxes = torch.as_tensor(boxes, dtype=torch.float32).view(-1, 4).to(self.device)
 
         # # get labels
@@ -190,6 +185,8 @@ class TrainImageLoaderResize(Dataset):
         target = dict()
         target['boxes'] = boxes
         target['labels'] = labels
+        target['w_r'] = width_ratio
+        target['h_r'] = height_ratio
 
         if self.transform is not None:
             img = self.transform(img)
