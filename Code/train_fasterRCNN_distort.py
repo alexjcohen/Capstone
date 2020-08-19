@@ -23,6 +23,7 @@ parser.add_argument('--blur', default=0, type=int, help='Scale of blur')
 parser.add_argument('--noise', default=0, type=int, help='Scale of noise')
 parser.add_argument('--train-backbone', default=False, action='store_true', help='Restrict training to feature '
                                                                                  'extractor backbone')
+parser.add_argument('--train-head', default=False, action='store_true', help='Restrict training to model head')
 parser.add_argument('--train-scratch', default=True, action='store_false', help='Do not use pretrained weights')
 
 if __name__ == '__main__':
@@ -49,6 +50,7 @@ if __name__ == '__main__':
 
     # set model training parameters
     train_backbone = args.train_backbone
+    train_head = args.train_head
     pretrained = args.train_scratch
     if pretrained:
         train_backbone = False
@@ -57,7 +59,8 @@ if __name__ == '__main__':
     model = torchvision.models.detection.fasterrcnn_resnet50_fpn(pretrained=pretrained)
     model.train()
     print('Model loaded!')
-
+    if not pretrained:
+        print('Training new network')
 
     # set data loaders
     if batch_size == 1:
@@ -105,7 +108,16 @@ if __name__ == '__main__':
             param.requires_grad = False
         for param in model.backbone.parameters():
             param.requires_grad = True
-        print('Model head frozen')
+        print('Training model backbone')
+
+    if train_head:
+        for param in model.parameters():
+            param.requires_grad = False
+        for param in model.roi_heads.parameters():
+            param.requires_grad = True
+        for param in model.rpn.parameters():
+            param.requires_grad = True
+        print('Training model head')
 
     # get the parameters for the optimizer and move model to the device
     params = [p for p in model.parameters() if p.requires_grad]
@@ -146,6 +158,25 @@ if __name__ == '__main__':
                 del targets[i]['w_r']
                 del targets[i]['h_r']
 
+            null_check = []
+
+            for i in range(batch_size):
+                if len(targets[i]['boxes']) == 0:
+                    null_check.append(i)
+
+            null_check = null_check[::-1]
+
+            if null_check:
+                for null in null_check:
+                    del targets[null]
+                    del img[null]
+
+            assert (len(img) == len(targets))
+
+            for i in range(len(img)):
+                assert len(img[i]) > 0
+                assert len(targets[i]['boxes']) > 0
+
             # ensure boxes are smaller than the reshaped image size
             assert [target['boxes'] <= 224 for target in targets]
 
@@ -154,20 +185,34 @@ if __name__ == '__main__':
             losses = sum(loss for loss in losses_dict.values())
             assert not np.isnan(losses.item())
 
-            # append and backprop loss
-            total_losses.append(losses.item())
-            optimizer.zero_grad()
-            losses.backward()
-            torch.nn.utils.clip_grad_norm_(model.parameters(), 0.5)  # gradient clipping to prevent overflow
-            optimizer.step()
+            if not np.isnan(losses.item()):
+
+                # append and backprop loss
+                total_losses.append(losses.item())
+                optimizer.zero_grad()
+                losses.backward()
+                torch.nn.utils.clip_grad_norm_(model.parameters(), 0.5)  # gradient clipping to prevent overflow
+                optimizer.step()
 
             # print intermediate loss
-            if batch % 100 == 0:
-                print(f'Epoch: {epoch+1} Batch: {batch}/{len(data_loader)}, '
-                      f'Loss: {np.nanmean(total_losses[-100:])}')
+            if batch % 500 == 0:
+                print(f'Epoch: {epoch + 1} Batch: {batch}/{len(data_loader)}, '
+                      f'Loss: {np.nanmean(total_losses[-500:])}')
 
         # print epoch average loss
         print(f'--------EPOCH: {epoch+1}, AVG. LOSS: {np.nanmean(total_losses)}--------')
+
+    if train_backbone & train_head:
+        model_end = 'full_retrain.pt'
+
+    elif train_backbone:
+        model_end = 'train_backbone.pt'
+
+    elif train_head:
+        model_end = 'train_head.pt'
+
+    else:
+        model_end = 'scratch_train.pt'
 
     # print model training
     print('Model trained! Saving model')
@@ -176,7 +221,7 @@ if __name__ == '__main__':
                  '_epoch' + str(n_epoch) + \
                  '_batchsize' + str(batch_size) + '_' + \
                  str(n_batches) + '_nbatch' + \
-                 '.pt'
+                 model_end
 
     if not os.path.exists('Models'):
         os.mkdir('Models')

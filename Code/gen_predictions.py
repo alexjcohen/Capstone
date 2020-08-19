@@ -38,7 +38,7 @@ if __name__ == '__main__':
         model_path = args.model_path
 
     # set output file name
-    output_path = 'output_json_model_2blur_10noise_10epoch_1250nbatch_retrain/'
+    output_path = 'json_output_all_retrain_2500batch_small_distort/'
     if not os.path.exists(output_path):
         os.mkdir(output_path)
     output_file = 'val2017_pred_' + transform_type + str(degree).zfill(2) + '.json'
